@@ -5,19 +5,32 @@ using System.Web;
 using System.Web.Mvc;
 using SportsStore.Domain.Abstract;
 using SportsStore.Domain.Entities;
+using SportsStore.WebUI.Models;
 
-namespace SportStore.WebUI.Controllers
-{
-    public class ProductController : Controller
-    {
+namespace SportStore.WebUI.Controllers {
+    public class ProductController : Controller {
         private IProductRepository repository;
+        public int PageSize = 4;
 
         public ProductController(IProductRepository repositoryParam) {
             repository = repositoryParam;
         }
 
-        public ViewResult List() {
-            return View(repository.Products);
+        public ViewResult List(int page = 1) {
+            ProductListViewModel model = new ProductListViewModel {
+                Products = repository.Products
+                    .OrderBy(p => p.ProductID)
+                    .Skip((page - 1) * PageSize)
+                    .Take(PageSize),
+                PagingInfo = new PagingInfo {
+                    CurrentPage = page,
+                    ItemsPerPage = PageSize,
+                    TotalItems = repository.Products.Count()
+                }
+            };
+            return View(model);
         }
     }
 }
+           
+  
